@@ -9,13 +9,13 @@ import * as dn from "dnum";
 export const runtime = "edge";
 
 // Image metadata
-export const alt = "";
 export const size = {
   width: 1200,
   height: 630,
 };
-
 export const contentType = "image/png";
+export const alt = 'Hall of Yodl'
+
 
 export default async function Image({
   params,
