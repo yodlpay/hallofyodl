@@ -27,8 +27,8 @@ const querySchema = z.object({
 export default async function LeaderBoardReceiverPage({
   params, searchParams
 }: {
-  params: { handle: string };
-  searchParams: { [key: string]: string | string[] | undefined }
+  params: Promise<any>;
+  searchParams: Promise<any>
 }
 ) {
   const { handle } = await params;

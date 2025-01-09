@@ -38,18 +38,6 @@ function TableHeader({ title, symbol }: { title: string, symbol: string }) {
   );
 }
 
-function TableHeaderPayments({ title, symbol }: { title: string, symbol: string }) {
-  return (
-    <Table.Header>
-      <Table.Row>
-        <Table.ColumnHeaderCell>{title}</Table.ColumnHeaderCell>
-        <Table.ColumnHeaderCell align="right">Date</Table.ColumnHeaderCell>
-        <Table.ColumnHeaderCell align="right">Amount</Table.ColumnHeaderCell>
-      </Table.Row>
-    </Table.Header>
-  );
-}
-
 
 function ScoreCard({ title, value }: { title: string, value: string }) {
   return (
@@ -65,11 +53,7 @@ function ScoreCard({ title, value }: { title: string, value: string }) {
   );
 }
 
-export default async function LeaderBoardReceiverPage({
-  params,
-}: {
-  params: { handle: string };
-}) {
+export default async function LeaderBoardReceiverPage({ params }: { params: Promise<any> }) {
   const { handle } = await params;
 
   const ensNormalized = normalize(handle);
@@ -96,15 +80,10 @@ export default async function LeaderBoardReceiverPage({
     .value();
 
   const biggestSpender = bySender[0].totalAmountInUSD;
-
-  const largest = _(payments)
-    .orderBy(['tokenOutAmountGrossNumber'], ['desc'])
-    .take(5)
-    .value();
-
   const mostRecent = _.take(payments, 5);
 
   const avatarUrl = `https://effigy.im/a/${ensNormalized}.svg`;
+
   let dateTracker = "";
 
   return (
