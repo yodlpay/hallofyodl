@@ -63,8 +63,6 @@ export type PaymentSimple = {
 export async function fetchLeaderboardReceiving(
   ensName: string,
 ): Promise<LeaderboardResponse> {
-  assert(ensName, "ensName is required");
-
   const mostRecentResp = await fetch(
     `${INDEXER_API_URL}/v1/payments?receiverEnsPrimaryName=${ensName}&perPage=10`,
     { next: { revalidate: 10 } },

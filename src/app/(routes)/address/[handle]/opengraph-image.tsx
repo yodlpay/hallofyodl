@@ -116,6 +116,7 @@ export default async function Image({
               {bySender.map((sender) => {
                 return (
                   <div
+                    key={sender.address}
                     style={{
                       display: "flex",
                       flexDirection: "row",

@@ -17,10 +17,7 @@ import {
 import _ from "lodash";
 import { normalize } from "viem/ens";
 import { format as dateFormat } from "date-fns";
-import {
-  fetchLeaderboardReceiving,
-  fetchPayments,
-} from "@/lib/clients/indexerApiClient";
+import { fetchPayments } from "@/lib/clients/indexerApiClient";
 import truncateEthAddress from "truncate-eth-address";
 import { AddressDisplay, Identity } from "@/app/components/Identity";
 import {
