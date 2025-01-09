@@ -12,6 +12,7 @@
     "@radix-ui/themes": "^3.1.6",
     "@tanstack/react-query": "^5.63.0",
     "@types/lodash": "^4.17.14",
+    "console-table-printer": "^2.12.1",
     "date-fns": "^4.1.0",
     "dnum": "^2.14.0",
     "dotenv": "^16.4.7",

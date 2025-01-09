@@ -1,4 +1,3 @@
-import assert from "assert";
 import { Address, Hex } from "viem";
 import * as dn from "dnum";
 const INDEXER_API_URL = process.env.INDEXER_API_URL || "/api";
@@ -100,8 +99,6 @@ export async function fetchPayments(
   orderBy: string = "blockTimestamp",
   perPage: number = 50,
 ): Promise<PaymentPaginate> {
-  assert(ensName, "ensName is required");
-
   const tokenSymbols = "USDC,USDT,USDGLO,DAI,USDM,FRAX,USDC.E,USDT.E,DAI.E";
 
   const paymentsResp = await fetch(
