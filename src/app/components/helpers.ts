@@ -1,9 +1,6 @@
-
-
-
 import * as dn from "dnum";
 
-const rankEmoji = [0, '🥇', '🥈', '🥉'];
+const rankEmoji = [0, "🥇", "🥈", "🥉"];
 export function rankify(rank: number) {
   return rank < 4 ? rankEmoji[rank] : `${rank}.`;
 }
@@ -26,4 +23,4 @@ export const truncateTxHash = (
 
 export const dnFormatFiat = (amount: dn.Dnum) => {
   return dn.format(amount, { trailingZeros: true, digits: 2 });
-}
+};

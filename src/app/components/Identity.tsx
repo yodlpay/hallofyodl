@@ -1,8 +1,8 @@
-import { Tooltip, Text, Flex, Code } from '@radix-ui/themes';
-import truncateEthAddress from 'truncate-eth-address';
-import { Address, isAddress } from 'viem';
-import { FC } from 'react';
-import _ from 'lodash';
+import { Tooltip, Text, Flex, Code } from "@radix-ui/themes";
+import truncateEthAddress from "truncate-eth-address";
+import { Address, isAddress } from "viem";
+import { FC } from "react";
+import _ from "lodash";
 
 /**
  * HiFi component that displays ensName/address with tooltips etc.
@@ -15,14 +15,14 @@ export const Identity: FC<{
   address: Address | string | undefined;
 }> = ({ ensName, address }) => {
   if (ensName) {
-    const [first, ...rest] = ensName.split('.');
+    const [first, ...rest] = ensName.split(".");
 
     return (
       <Tooltip content={address}>
         <Text>
           {first}
           {!_.isEmpty(rest) && (
-            <Text className="opacity-70">.{rest.join('.')}</Text>
+            <Text className="opacity-70">.{rest.join(".")}</Text>
           )}
         </Text>
       </Tooltip>

@@ -1,7 +1,7 @@
-import assert from 'assert';
-import { Address, Hex } from 'viem';
+import assert from "assert";
+import { Address, Hex } from "viem";
 import * as dn from "dnum";
-const INDEXER_API_URL = process.env.INDEXER_API_URL || '/api';
+const INDEXER_API_URL = process.env.INDEXER_API_URL || "/api";
 
 export type PaymentStats = {
   volumeInUSD: number;
@@ -45,26 +45,26 @@ export type LeaderResultX = {
 };
 
 export type PaymentSimple = {
-  chainId: number,
-  txHash: string,
-  paymentIndex: number,
-  blockTimestamp: string,
+  chainId: number;
+  txHash: string;
+  paymentIndex: number;
+  blockTimestamp: string;
 
-  tokenOutSymbol: string,
-  tokenOutAddress: string,
-  tokenOutAmountGross: string,
-  tokenOutAmountGrossNumber: number,
-  tokenOutAmountGrossDn: dn.Dnum,
-  receiverAddress: string,
-  receiverEnsPrimaryName: string,
-  senderAddress: string,
-  senderEnsPrimaryName: string,
-}
+  tokenOutSymbol: string;
+  tokenOutAddress: string;
+  tokenOutAmountGross: string;
+  tokenOutAmountGrossNumber: number;
+  tokenOutAmountGrossDn: dn.Dnum;
+  receiverAddress: string;
+  receiverEnsPrimaryName: string;
+  senderAddress: string;
+  senderEnsPrimaryName: string;
+};
 
 export async function fetchLeaderboardReceiving(
   ensName: string,
 ): Promise<LeaderboardResponse> {
-  assert(ensName, 'ensName is required');
+  assert(ensName, "ensName is required");
 
   const mostRecentResp = await fetch(
     `${INDEXER_API_URL}/v1/payments?receiverEnsPrimaryName=${ensName}&perPage=10`,
@@ -75,7 +75,7 @@ export async function fetchLeaderboardReceiving(
     `${INDEXER_API_URL}/v1/stats?receiverEnsPrimaryName=${ensName}`,
     { next: { revalidate: 10 } },
   );
-  console.log(`${INDEXER_API_URL}/v1/stats?receiverEnsPrimaryName=${ensName}`)
+  console.log(`${INDEXER_API_URL}/v1/stats?receiverEnsPrimaryName=${ensName}`);
 
   const largestResp = await fetch(
     `${INDEXER_API_URL}/v1/payments?receiverEnsPrimaryName=${ensName}&sortBy=amountUSD&perPage=10`,
@@ -85,8 +85,7 @@ export async function fetchLeaderboardReceiving(
   const { payments: mostRecent } = await mostRecentResp.json();
   const { payments: largest } = await largestResp.json();
   const { stats: bySender } = await bySenderResp.json();
-  console.log(bySenderResp)
-
+  console.log(bySenderResp);
 
   return {
     mostRecent,
@@ -98,24 +97,21 @@ export async function fetchLeaderboardReceiving(
 export async function fetchPayments(
   ensName: string,
   page: number = 1,
-  orderBy: string = 'blockTimestamp',
+  orderBy: string = "blockTimestamp",
   perPage: number = 50,
 ): Promise<PaymentPaginate> {
-  assert(ensName, 'ensName is required');
+  assert(ensName, "ensName is required");
 
   const paymentsResp = await fetch(
     `${INDEXER_API_URL}/v1/payments?page=${page}&receiverEnsPrimaryName=${ensName}&sortBy=${orderBy}`,
     { next: { revalidate: 10 } },
   );
 
-  const response = await paymentsResp.json() as PaymentPaginate;
+  const response = (await paymentsResp.json()) as PaymentPaginate;
 
   response.payments.forEach((p) => {
     p.tokenOutAmountGrossDn = dn.from(p.tokenOutAmountGross, 2);
     p.tokenOutAmountGrossNumber = dn.toNumber(p.tokenOutAmountGrossDn);
-  })
+  });
   return response;
 }
-
-
-
