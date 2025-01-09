@@ -22,13 +22,16 @@ import {
   fetchPayments,
 } from "@/lib/clients/indexerApiClient";
 import truncateEthAddress from "truncate-eth-address";
-import { Identity } from "@/app/components/Identity";
+import { AddressDisplay, Identity } from "@/app/components/Identity";
 import {
   dnFormatFiat,
   rankify,
   truncateTxHash,
 } from "@/app/components/helpers";
 import * as dn from "dnum";
+import AddressHeader from "@/app/components/AddressHeader";
+import { Address } from "viem";
+import AddressOverview from "@/app/components/AddressOverview";
 
 function TableHeader({ title, symbol }: { title: string; symbol: string }) {
   return (
@@ -103,33 +106,26 @@ export default async function LeaderBoardReceiverPage({
   return (
     <Container pt="0" px="2" pb="9">
       <Grid columns="1" gap="4">
-        <Flex gap="2" align="center" px="2" pt="2" justify="start">
-          <Avatar src={avatarUrl} fallback=".." radius="full" size="3" />
-          <Box>
-            <Text as="div" size="3" weight="regular">
-              {ensNormalized}
-            </Text>
-          </Box>
-        </Flex>
+        <AddressHeader ensName={handle} />
         <Grid columns="3" gap="4">
           <ScoreCard title="Payments" value={count.toString()} />
           <ScoreCard
             title="Total"
-            value={`${dnFormatFiat(dn.from(totalPaid))}`}
+            value={`$${dnFormatFiat(dn.from(totalPaid))}`}
           />
           <ScoreCard
             title="Biggest Spender"
-            value={dnFormatFiat(dn.from(biggestSpender))}
+            value={`$${dnFormatFiat(dn.from(biggestSpender))}`}
           />
         </Grid>
         <Card variant="classic">
           <Flex px="2" py="2" mb="3" justify="between" align="end">
             <Heading size="4" weight="medium">
-              Top Spenders
+              Hall of Fame
             </Heading>
           </Flex>
           <Table.Root style={{ captionSide: "bottom" }} size="1">
-            <TableHeader title="Sender" symbol="💸" />
+            <TableHeader title="" symbol="💸" />
             <Table.Body>
               {bySender.map((row, i) => {
                 const sameRank = bySender[i - 1]?.rank != row.rank;
@@ -137,7 +133,7 @@ export default async function LeaderBoardReceiverPage({
                   <Table.Row key={i}>
                     <Table.Cell>{sameRank && rankify(row.rank)}</Table.Cell>
                     <Table.Cell>
-                      <Identity ensName={undefined} address={row.address} />
+                      <AddressOverview address={row.address as Address} />
                     </Table.Cell>
                     <Table.Cell align="right">
                       {row.txCount.toString()}
@@ -208,15 +204,15 @@ export default async function LeaderBoardReceiverPage({
                       </Link>
                     </Table.Cell>
                     <Table.Cell>
-                      <Text style={{ opacity: isSameDate ? 0.2 : 1 }}>
+                      <Text style={{ opacity: isSameDate ? 0.1 : 1 }}>
                         {txDate}
                       </Text>
                       <Text ml="2">{txTime}</Text>
                     </Table.Cell>
                     <Table.Cell>
-                      <Identity
+                      <AddressOverview
                         ensName={row.senderEnsPrimaryName}
-                        address={row.senderAddress}
+                        address={row.senderAddress as Address}
                       />
                     </Table.Cell>
                     <Table.Cell align="right">

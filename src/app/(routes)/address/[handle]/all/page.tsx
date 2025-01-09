@@ -18,6 +18,7 @@ import { Identity } from "@/app/components/Identity";
 import { dnFormatFiat, truncateTxHash } from "@/app/components/helpers";
 import { z } from "zod";
 import * as dn from "dnum";
+import AddressHeader from "@/app/components/AddressHeader";
 
 const querySchema = z.object({
   page: z.coerce.number().default(1),
@@ -49,14 +50,7 @@ export default async function LeaderBoardReceiverPage({
 
   return (
     <Container pt="0" px="2">
-      <Flex gap="3" align="center" px="2" pt="2" justify="start">
-        <Avatar src={avatarUrl} fallback=".." radius="full" size="3" />
-        <Box>
-          <Text as="div" size="3" weight="regular">
-            {ensNormalized}
-          </Text>
-        </Box>
-      </Flex>
+      <AddressHeader ensName={handle} />
       <Card mt="3" variant="classic">
         <Flex px="2" py="2" mb="3" justify="between" align="end">
           <Heading size="4" weight="medium">

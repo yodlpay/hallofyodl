@@ -102,8 +102,10 @@ export async function fetchPayments(
 ): Promise<PaymentPaginate> {
   assert(ensName, "ensName is required");
 
+  const tokenSymbols = "USDC,USDT,USDGLO,DAI,USDM,FRAX,USDC.E,USDT.E,DAI.E";
+
   const paymentsResp = await fetch(
-    `${INDEXER_API_URL}/v1/payments?page=${page}&receiverEnsPrimaryName=${ensName}&sortBy=${orderBy}`,
+    `${INDEXER_API_URL}/v1/payments?page=${page}&receiverEnsPrimaryName=${ensName}&sortBy=${orderBy}&tokenOutSymbols=${tokenSymbols}`,
     { next: { revalidate: 10 } },
   );
 
