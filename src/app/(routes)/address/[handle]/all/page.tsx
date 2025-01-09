@@ -62,6 +62,7 @@ export default async function LeaderBoardReceiverPage({
         <Flex px="2" py="2" mb="3" justify="between" align="end">
           <Heading size="4" weight="medium">All Payments</Heading>
         </Flex>
+
         <Table.Root style={{ captionSide: 'bottom' }} size="1">
           <Table.Header>
             <Table.Row>

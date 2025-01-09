@@ -20,7 +20,7 @@ import { format as dateFormat } from "date-fns";
 import { fetchLeaderboardReceiving, fetchPayments } from '@/lib/clients/indexerApiClient';
 import truncateEthAddress from 'truncate-eth-address';
 import { Identity } from '@/app/components/Identity';
-import { dnFormatFiat, rankify } from '@/app/components/helpers';
+import { dnFormatFiat, rankify, truncateTxHash } from '@/app/components/helpers';
 import * as dn from 'dnum';
 
 function TableHeader({ title, symbol }: { title: string, symbol: string }) {
@@ -105,103 +105,126 @@ export default async function LeaderBoardReceiverPage({
   const mostRecent = _.take(payments, 5);
 
   const avatarUrl = `https://effigy.im/a/${ensNormalized}.svg`;
+  let dateTracker = "";
 
   return (
-    <Container pt="0" px="2">
-      <Flex gap="3" align="center" px="2" pt="2" justify="start">
-        <Avatar src={avatarUrl} fallback=".." radius="full" size="3" />
-        <Box>
-          <Text as="div" size="3" weight="regular">
-            {ensNormalized}
-          </Text>
-        </Box>
-      </Flex>
-      <Grid mt="3" columns="3" gap="3">
-        <ScoreCard title="Payments" value={count.toString()} />
-        <ScoreCard title="Total" value={`${dnFormatFiat(dn.from(totalPaid))}`} />
-        <ScoreCard title="Biggest Spender" value={dnFormatFiat(dn.from(biggestSpender))} />
+    <Container pt="0" px="2" pb="9">
+      <Grid columns="1" gap="4">
+        <Flex gap="2" align="center" px="2" pt="2" justify="start">
+          <Avatar src={avatarUrl} fallback=".." radius="full" size="3" />
+          <Box>
+            <Text as="div" size="3" weight="regular">
+              {ensNormalized}
+            </Text>
+          </Box>
+        </Flex>
+        <Grid columns="3" gap="4">
+          <ScoreCard title="Payments" value={count.toString()} />
+          <ScoreCard title="Total" value={`${dnFormatFiat(dn.from(totalPaid))}`} />
+          <ScoreCard title="Biggest Spender" value={dnFormatFiat(dn.from(biggestSpender))} />
+        </Grid>
+        <Card variant="classic">
+          <Flex px="2" py="2" mb="3" justify="between" align="end">
+            <Heading size="4" weight="medium">Top Spenders</Heading>
+          </Flex>
+          <Table.Root style={{ captionSide: 'bottom' }} size="1">
+            <TableHeader title="Sender" symbol="💸" />
+            <Table.Body>
+              {bySender.map((row, i) => {
+                const sameRank = bySender[i - 1]?.rank != row.rank;
+                return (
+                  <Table.Row key={i}>
+                    <Table.Cell>{sameRank && rankify(row.rank)}</Table.Cell>
+                    <Table.Cell>
+                      <Identity
+                        ensName={undefined}
+                        address={row.address}
+                      />
+                    </Table.Cell>
+                    <Table.Cell align="right">
+                      {row.txCount.toString()}
+                    </Table.Cell>
+                    <Table.Cell align="right">
+                      ${dnFormatFiat(dn.from(row.totalAmountInUSD))}
+                    </Table.Cell>
+                  </Table.Row>
+                );
+              })}
+              {_.isEmpty(bySender) && (
+                <Table.Row key="empty">
+                  <Table.Cell colSpan={4}>
+                    <Text style={{ fontStyle: 'italic' }}>No senders found.</Text>
+                  </Table.Cell>
+                </Table.Row>
+              )}
+            </Table.Body>
+          </Table.Root>
+        </Card>
+        <Card variant="classic">
+          <Flex px="2" py="2" mb="3" justify="between" align="end">
+            <Heading size="4" weight="medium">Payments</Heading>
+          </Flex>
+          <Table.Root style={{ captionSide: 'bottom' }} size="1">
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeaderCell width="50px">Tx</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell width="150px">Date <Text weight="light">(UTC)</Text></Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell>From</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell align="right">Amount</Table.ColumnHeaderCell>
+                <Table.ColumnHeaderCell align="right">Tokens</Table.ColumnHeaderCell>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {
+                mostRecent.map((row, i) => {
+                  const txDate = dateFormat(new Date(row.blockTimestamp), 'yyyy-MM-dd')
+                  const txTime = dateFormat(new Date(row.blockTimestamp), 'HH:mm')
+                  const isSameDate = dateTracker === txDate;
+                  if (!isSameDate) {
+                    dateTracker = txDate;
+                  }
+                  return (
+                    <Table.Row key={i}>
+                      <Table.Cell>
+                        <Link title="Yodl Receipt" target="_blank" href={`https://yodl.me/tx/${row.txHash}`}>{truncateTxHash(row.txHash)}</Link>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Text style={{ opacity: isSameDate ? 0.2 : 1 }}>{txDate}</Text>
+                        <Text ml="2">{txTime}</Text>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Identity
+                          ensName={row.senderEnsPrimaryName}
+                          address={row.senderAddress}
+                        />
+                      </Table.Cell>
+                      <Table.Cell align="right">
+                        ${dnFormatFiat(dn.from(row.tokenOutAmountGross, 2))}
+                      </Table.Cell>
+                      <Table.Cell align="right">
+                        {row.tokenOutSymbol}
+                      </Table.Cell>
+                    </Table.Row>
+                  );
+                })}
+              {_.isEmpty(payments) && (
+                <Table.Row key="empty">
+                  <Table.Cell colSpan={4}>
+                    <Text style={{ fontStyle: 'italic' }}>
+                      No payments.
+                    </Text>
+                  </Table.Cell>
+                </Table.Row>
+              )}
+            </Table.Body>
+          </Table.Root>
+          <Flex mt="3" justify="end">
+            <Button variant="outline" asChild>
+              <Link size="2" href={`/address/${handle}/all`}>View all</Link>
+            </Button>
+          </Flex>
+        </Card>
       </Grid>
-      <Card mt="3" variant="classic">
-        <Flex px="2" py="2" mb="3" justify="between" align="end">
-          <Heading size="4" weight="medium">Top Spenders</Heading>
-        </Flex>
-        <Table.Root style={{ captionSide: 'bottom' }} size="1">
-          <TableHeader title="Top spenders" symbol="💸" />
-          <Table.Body>
-            {bySender.map((row, i) => {
-              const sameRank = bySender[i - 1]?.rank != row.rank;
-              return (
-                <Table.Row key={i}>
-                  <Table.Cell>{sameRank && rankify(row.rank)}</Table.Cell>
-                  <Table.Cell>
-                    <Identity
-                      ensName={undefined}
-                      address={row.address}
-                    />
-                  </Table.Cell>
-                  <Table.Cell align="right">
-                    {row.txCount.toString()}
-                  </Table.Cell>
-                  <Table.Cell align="right">
-                    ${dnFormatFiat(dn.from(row.totalAmountInUSD))}
-                  </Table.Cell>
-                </Table.Row>
-              );
-            })}
-            {_.isEmpty(bySender) && (
-              <Table.Row key="empty">
-                <Table.Cell colSpan={4}>
-                  <Text style={{ fontStyle: 'italic' }}>No senders found.</Text>
-                </Table.Cell>
-              </Table.Row>
-            )}
-          </Table.Body>
-        </Table.Root>
-      </Card>
-      <Card mt="6" variant="classic">
-        <Flex px="2" py="2" mb="3" justify="between" align="end">
-          <Heading size="4" weight="medium">Payments</Heading>
-        </Flex>
-        <Table.Root style={{ captionSide: 'bottom' }} size="1">
-          <TableHeaderPayments title="Largest" symbol="💸" />
-          <Table.Body>
-            {mostRecent.map((row, i) => {
-              return (
-                <Table.Row key={i}>
-                  <Table.Cell>
-                    {
-                      dateFormat(new Date(row.blockTimestamp), 'yyyy-MM-dd HH:mm')
-                    }
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Identity
-                      ensName={row.senderEnsPrimaryName}
-                      address={row.senderAddress}
-                    />
-                  </Table.Cell>
-                  <Table.Cell align="right">
-                    ${dnFormatFiat(dn.from(row.tokenOutAmountGross, 2))}
-                  </Table.Cell>
-                </Table.Row>
-              );
-            })}
-            {_.isEmpty(mostRecent) && (
-              <Table.Row key="empty">
-                <Table.Cell colSpan={4}>
-                  <Text style={{ fontStyle: 'italic' }}>
-                    No payments yet.
-                  </Text>
-                </Table.Cell>
-              </Table.Row>
-            )}
-          </Table.Body>
-        </Table.Root>
-        <Flex mt="3" justify="end">
-          <Button variant="outline" asChild>
-            <Link size="2" href={`/address/${handle}/all`}>View all</Link>
-          </Button>
-        </Flex>
-      </Card>
     </Container>
   );
 }
