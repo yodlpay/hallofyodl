@@ -88,8 +88,6 @@ export default async function LeaderBoardReceiverPage({
   const biggestSpender = bySender[0]?.totalAmountInUSD;
   const mostRecent = _.take(payments, 5);
 
-  const avatarUrl = `https://effigy.im/a/${ensNormalized}.svg`;
-
   let dateTracker = "";
 
   return (
@@ -102,7 +100,7 @@ export default async function LeaderBoardReceiverPage({
         />
         <ScoreCard
           title="Biggest Spender"
-          value={`$${dnFormatFiat(dn.from(biggestSpender))}`}
+          value={biggestSpender ? `$${dnFormatFiat(dn.from(biggestSpender))}` : "-"}
         />
       </Grid>
       <Card variant="classic">
