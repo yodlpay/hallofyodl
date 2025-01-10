@@ -34,7 +34,7 @@ async function DonateButton({ ensName }: { ensName: string }) {
 
   const redirectUrl = `${proto}://${hostname}/address/${ensName}/finalize`
   const yodlParams = `redirectUrl=${redirectUrl}`
-  const yodlUrl = `https://yodl.me/${ensName}${yodlParams}`
+  const yodlUrl = `https://yodl.me/${ensName}?${yodlParams}`
 
 
   return <Button size="3" asChild>
