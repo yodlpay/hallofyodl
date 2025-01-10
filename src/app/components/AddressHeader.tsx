@@ -1,12 +1,12 @@
+"use client";
+
 import { Avatar, Text, Box, Flex, Link, Grid, Button } from "@radix-ui/themes";
 import { normalize } from "path";
-import { headers } from 'next/headers';
+import { useEnsText } from "wagmi";
 
-
-export default async function AddressHeader({ ensName }: { ensName: string }) {
+export default function AddressHeader({ ensName }: { ensName: string }) {
   const ensNormalized = normalize(ensName);
   const avatarUrl = `https://metadata.ens.domains/mainnet/avatar/${ensNormalized}`;
-
 
   return (
     <Flex align="center" justify="between">
@@ -27,17 +27,30 @@ export default async function AddressHeader({ ensName }: { ensName: string }) {
   );
 }
 
-async function DonateButton({ ensName }: { ensName: string }) {
-  const headersList = await headers();
-  const proto = headersList.get('x-forwarded-proto');
-  const hostname = headersList.get('x-forwarded-host');
+function DonateButton({ ensName }: { ensName: string }) {
+  const { data: yodlJsonRaw, isLoading } = useEnsText({
+    name: ensName,
+    key: "me.yodl",
+    chainId: 1,
+    query: { enabled: !!ensName },
+  });
 
-  const redirectUrl = `${proto}://${hostname}/address/${ensName}/finalize`
-  const yodlParams = `redirectUrl=${redirectUrl}`
-  const yodlUrl = `https://yodl.me/${ensName}?${yodlParams}`
+  let yodlConfig = {};
+  try {
+    yodlConfig = yodlJsonRaw ? JSON.parse(yodlJsonRaw) : {};
+  } catch {}
 
+  let yodlUrl = `https://yodl.me/${ensName}`;
+  // @ts-ignore
+  if (!isLoading && !yodlConfig.redirectUrl) {
+    const proto = window.location.protocol;
+    const hostname = window.location.host;
+    yodlUrl += `?redirectUrl=${proto}://${hostname}/address/${ensName}/finalize`;
+  }
 
-  return <Button size="3" asChild>
-    <Link href={yodlUrl}>Donate</Link>
-  </Button>;
+  return (
+    <Button size="3" asChild>
+      <Link href={yodlUrl}>Donate</Link>
+    </Button>
+  );
 }
