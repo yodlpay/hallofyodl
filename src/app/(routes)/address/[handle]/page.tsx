@@ -2,14 +2,9 @@ import {
   Card,
   Heading,
   Table,
-  Container,
-  Inset,
   Flex,
-  Avatar,
   Text,
-  Box,
   Grid,
-  Code,
   Link,
   Button,
   Separator,
@@ -18,17 +13,15 @@ import _ from "lodash";
 import { normalize } from "viem/ens";
 import { format as dateFormat } from "date-fns";
 import { fetchPayments } from "@/lib/clients/indexerApiClient";
-import truncateEthAddress from "truncate-eth-address";
-import { AddressDisplay, Identity } from "@/app/components/Identity";
 import {
   dnFormatFiat,
   rankify,
   truncateTxHash,
 } from "@/app/components/helpers";
 import * as dn from "dnum";
-import AddressHeader from "@/app/components/AddressHeader";
 import { Address } from "viem";
 import AddressOverview from "@/app/components/AddressOverview";
+import CardHeader from "@/app/components/CardHeader";
 
 function TableHeader({ title, symbol }: { title: string; symbol: string }) {
   return (
@@ -38,7 +31,6 @@ function TableHeader({ title, symbol }: { title: string; symbol: string }) {
           🏆
         </Table.ColumnHeaderCell>
         <Table.ColumnHeaderCell>{title}</Table.ColumnHeaderCell>
-        <Table.ColumnHeaderCell align="right">Tx</Table.ColumnHeaderCell>
         <Table.ColumnHeaderCell align="right">Total</Table.ColumnHeaderCell>
       </Table.Row>
     </Table.Header>
@@ -101,142 +93,123 @@ export default async function LeaderBoardReceiverPage({
   let dateTracker = "";
 
   return (
-    <Container pt="0" px="2" pb="9">
-      <Grid columns="1" gap="4">
-        <AddressHeader ensName={handle} />
-        <Grid columns="3" gap="4">
-          <ScoreCard title="Payments" value={count.toString()} />
-          <ScoreCard
-            title="Total"
-            value={`$${dnFormatFiat(dn.from(totalPaid))}`}
-          />
-          <ScoreCard
-            title="Biggest Spender"
-            value={`$${dnFormatFiat(dn.from(biggestSpender))}`}
-          />
-        </Grid>
-        <Card variant="classic">
-          <Flex px="2" py="2" mb="3" justify="between" align="end">
-            <Heading size="4" weight="medium">
-              Hall of Fame
-            </Heading>
-          </Flex>
-          <Table.Root style={{ captionSide: "bottom" }} size="1">
-            <TableHeader title="" symbol="💸" />
-            <Table.Body>
-              {bySender.map((row, i) => {
-                const sameRank = bySender[i - 1]?.rank != row.rank;
-                return (
-                  <Table.Row key={i}>
-                    <Table.Cell>{sameRank && rankify(row.rank)}</Table.Cell>
-                    <Table.Cell>
-                      <AddressOverview address={row.address as Address} />
-                    </Table.Cell>
-                    <Table.Cell align="right">
-                      {row.txCount.toString()}
-                    </Table.Cell>
-                    <Table.Cell align="right">
-                      ${dnFormatFiat(dn.from(row.totalAmountInUSD))}
-                    </Table.Cell>
-                  </Table.Row>
-                );
-              })}
-              {_.isEmpty(bySender) && (
-                <Table.Row key="empty">
-                  <Table.Cell colSpan={4}>
-                    <Text style={{ fontStyle: "italic" }}>
-                      No senders found.
-                    </Text>
-                  </Table.Cell>
-                </Table.Row>
-              )}
-            </Table.Body>
-          </Table.Root>
-        </Card>
-        <Card variant="classic">
-          <Flex px="2" py="2" mb="3" justify="between" align="end">
-            <Heading size="4" weight="medium">
-              Payments
-            </Heading>
-          </Flex>
-          <Table.Root style={{ captionSide: "bottom" }} size="1">
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeaderCell width="50px">Tx</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell width="150px">
-                  Date <Text weight="light">(UTC)</Text>
-                </Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell>From</Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell align="right">
-                  Amount
-                </Table.ColumnHeaderCell>
-                <Table.ColumnHeaderCell align="right">
-                  Tokens
-                </Table.ColumnHeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {mostRecent.map((row, i) => {
-                const txDate = dateFormat(
-                  new Date(row.blockTimestamp),
-                  "yyyy-MM-dd",
-                );
-                const txTime = dateFormat(
-                  new Date(row.blockTimestamp),
-                  "HH:mm",
-                );
-                const isSameDate = dateTracker === txDate;
-                if (!isSameDate) {
-                  dateTracker = txDate;
-                }
-                return (
-                  <Table.Row key={i}>
-                    <Table.Cell>
-                      <Link
-                        title="Yodl Receipt"
-                        target="_blank"
-                        href={`https://yodl.me/tx/${row.txHash}`}
-                      >
-                        {truncateTxHash(row.txHash)}
-                      </Link>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Text style={{ opacity: isSameDate ? 0.1 : 1 }}>
-                        {txDate}
-                      </Text>
-                      <Text ml="2">{txTime}</Text>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <AddressOverview
-                        ensName={row.senderEnsPrimaryName}
-                        address={row.senderAddress as Address}
-                      />
-                    </Table.Cell>
-                    <Table.Cell align="right">
-                      ${dnFormatFiat(dn.from(row.tokenOutAmountGross, 2))}
-                    </Table.Cell>
-                    <Table.Cell align="right">{row.tokenOutSymbol}</Table.Cell>
-                  </Table.Row>
-                );
-              })}
-              {_.isEmpty(payments) && (
-                <Table.Row key="empty">
-                  <Table.Cell colSpan={4}>
-                    <Text style={{ fontStyle: "italic" }}>No payments.</Text>
-                  </Table.Cell>
-                </Table.Row>
-              )}
-            </Table.Body>
-          </Table.Root>
-          <Flex mt="3" justify="end">
-            <Button variant="outline" asChild>
-              <Link size="2" href={`/address/${handle}/all`}>
-                View all
-              </Link>
-            </Button>
-          </Flex>
-        </Card>
+    <>
+      <Grid columns="3" gap="4">
+        <ScoreCard title="Payments" value={count.toString()} />
+        <ScoreCard
+          title="Total"
+          value={`$${dnFormatFiat(dn.from(totalPaid))}`}
+        />
+        <ScoreCard
+          title="Biggest Spender"
+          value={`$${dnFormatFiat(dn.from(biggestSpender))}`}
+        />
       </Grid>
-    </Container>
+      <Card variant="classic">
+        <CardHeader title="Hall of Fame" />
+
+        <Table.Root style={{ captionSide: "bottom" }} size="1">
+          <TableHeader title="" symbol="💸" />
+          <Table.Body>
+            {bySender.map((row, i) => {
+              const sameRank = bySender[i - 1]?.rank != row.rank;
+              return (
+                <Table.Row key={i}>
+                  <Table.Cell>{sameRank && rankify(row.rank)}</Table.Cell>
+                  <Table.Cell>
+                    <AddressOverview address={row.address as Address} />
+                  </Table.Cell>
+                  <Table.Cell align="right">
+                    ${dnFormatFiat(dn.from(row.totalAmountInUSD))}
+                  </Table.Cell>
+                </Table.Row>
+              );
+            })}
+            {_.isEmpty(bySender) && (
+              <Table.Row key="empty">
+                <Table.Cell colSpan={4}>
+                  <Text style={{ fontStyle: "italic" }}>No senders found.</Text>
+                </Table.Cell>
+              </Table.Row>
+            )}
+          </Table.Body>
+        </Table.Root>
+      </Card>
+      <Card variant="classic">
+        <CardHeader title="Payments" />
+        <Table.Root style={{ captionSide: "bottom" }} size="1">
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeaderCell width="50px">Tx</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell width="150px">
+                Date <Text weight="light">(UTC)</Text>
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>From</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell align="right">
+                Amount
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell align="right">
+                Tokens
+              </Table.ColumnHeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {mostRecent.map((row, i) => {
+              const txDate = dateFormat(
+                new Date(row.blockTimestamp),
+                "yyyy-MM-dd",
+              );
+              const txTime = dateFormat(new Date(row.blockTimestamp), "HH:mm");
+              const isSameDate = dateTracker === txDate;
+              if (!isSameDate) {
+                dateTracker = txDate;
+              }
+              return (
+                <Table.Row key={i}>
+                  <Table.Cell>
+                    <Link
+                      title="Yodl Receipt"
+                      href={`/address/${handle}/tx/${row.txHash}`}
+                    >
+                      {truncateTxHash(row.txHash)}
+                    </Link>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Text style={{ opacity: isSameDate ? 0.1 : 1 }}>
+                      {txDate}
+                    </Text>
+                    <Text ml="2">{txTime}</Text>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <AddressOverview
+                      ensName={row.senderEnsPrimaryName}
+                      address={row.senderAddress as Address}
+                    />
+                  </Table.Cell>
+                  <Table.Cell align="right">
+                    ${dnFormatFiat(dn.from(row.tokenOutAmountGross, 2))}
+                  </Table.Cell>
+                  <Table.Cell align="right">{row.tokenOutSymbol}</Table.Cell>
+                </Table.Row>
+              );
+            })}
+            {_.isEmpty(payments) && (
+              <Table.Row key="empty">
+                <Table.Cell colSpan={4}>
+                  <Text style={{ fontStyle: "italic" }}>No payments.</Text>
+                </Table.Cell>
+              </Table.Row>
+            )}
+          </Table.Body>
+        </Table.Root>
+        <Flex mt="3" justify="end">
+          <Button variant="outline" asChild>
+            <Link size="2" href={`/address/${handle}/all`}>
+              View all
+            </Link>
+          </Button>
+        </Flex>
+      </Card>
+    </>
   );
 }
