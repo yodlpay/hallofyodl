@@ -85,7 +85,7 @@ export default async function LeaderBoardReceiverPage({
     }))
     .value();
 
-  const biggestSpender = bySender[0].totalAmountInUSD;
+  const biggestSpender = bySender[0]?.totalAmountInUSD;
   const mostRecent = _.take(payments, 5);
 
   const avatarUrl = `https://effigy.im/a/${ensNormalized}.svg`;
