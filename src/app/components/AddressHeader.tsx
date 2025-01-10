@@ -38,14 +38,14 @@ function DonateButton({ ensName }: { ensName: string }) {
   let yodlConfig = {};
   try {
     yodlConfig = yodlJsonRaw ? JSON.parse(yodlJsonRaw) : {};
-  } catch {}
+  } catch { }
 
   let yodlUrl = `https://yodl.me/${ensName}`;
   // @ts-ignore
   if (!isLoading && !yodlConfig.redirectUrl) {
     const proto = window.location.protocol;
     const hostname = window.location.host;
-    yodlUrl += `?redirectUrl=${proto}://${hostname}/address/${ensName}/finalize`;
+    yodlUrl += `?redirectUrl=${proto}//${hostname}/address/${ensName}/finalize`;
   }
 
   return (
